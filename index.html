@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fulfilment Dashboard</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+<script src="{{ url_for('static', filename='js/chart.umd.js') }}"></script>
+</head>
+<body>
+
+<button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle filters">☰ Filters</button>
+
+<div class="app-shell">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-head">
+      <span class="refresh-time" id="refreshTime">Loading…</span>
+      <button class="clear-btn" id="clearFilters">Clear all filters</button>
+    </div>
+
+    <div class="filter-group" data-key="demand_type">
+      <h4>Req. Classification</h4>
+      <div class="filter-options" id="opt-demand_type"></div>
+    </div>
+
+    <div class="filter-group" data-key="location">
+      <h4>Region / Location</h4>
+      <div class="filter-options" id="opt-location"></div>
+    </div>
+
+    <div class="filter-group" data-key="sbu">
+      <h4>Practice (SBU)</h4>
+      <div class="filter-options scroll" id="opt-sbu"></div>
+    </div>
+
+    <div class="filter-group" data-key="bu_head">
+      <h4>Business Unit Head</h4>
+      <div class="filter-options scroll" id="opt-bu_head"></div>
+    </div>
+
+    <div class="filter-group" data-key="account">
+      <h4>Account</h4>
+      <div class="filter-options scroll" id="opt-account"></div>
+    </div>
+
+    <div class="filter-group" data-key="employment_type">
+      <h4>Employment Type</h4>
+      <div class="filter-options" id="opt-employment_type"></div>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main">
+
+    <header class="topbar">
+      <h1>Fulfilment Dashboard <span class="quarter-tag">FY27 Q1</span></h1>
+      <div class="topbar-right">
+        <span class="data-pill" id="rowCountPill">— records</span>
+        <span class="updated-pill" id="updatedPill">Data updated —</span>
+      </div>
+    </header>
+
+    <!-- HEX KPI STRIP -->
+    <section class="hex-strip" id="hexStrip"></section>
+
+    <!-- METRIC STRIP -->
+    <section class="metric-strip" id="metricStrip"></section>
+
+    <!-- GRID -->
+    <section class="grid">
+
+      <!-- Week on week (wide) -->
+      <div class="card wide" id="cardWeekOnWeek">
+        <h3>Week on Week (Onboards + Pipeline)</h3>
+        <div class="chart-wrap tall"><canvas id="chartWeekOnWeek"></canvas></div>
+      </div>
+
+      <!-- Projection -->
+      <div class="card" id="cardProjection">
+        <h3>Projection</h3>
+        <div class="projection-body">
+          <div class="proj-block">
+            <span class="proj-label">Based on current pipeline</span>
+            <span class="proj-value" id="projCurrent">—</span>
+          </div>
+          <div class="proj-divider"></div>
+          <div class="proj-block">
+            <span class="proj-label">Based on avg. onboards / week</span>
+            <span class="proj-value" id="projAvg">—</span>
+            <span class="proj-sub" id="projWeeksLeft">—</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- right column KPI panel -->
+      <div class="card kpi-panel" id="cardKpiPanel">
+        <h3>KPI</h3>
+
+        <div class="kpi-block">
+          <h4>Candidate Status</h4>
+          <div class="chart-wrap small"><canvas id="chartCandidateStatus"></canvas></div>
+        </div>
+
+        <div class="kpi-block">
+          <h4>Source Mix</h4>
+          <div class="chart-wrap small"><canvas id="chartSourceMix"></canvas></div>
+        </div>
+
+        <div class="kpi-block">
+          <h4>Experience Band</h4>
+          <table class="mini-table" id="tableExpBand"></table>
+        </div>
+
+        <div class="kpi-block">
+          <h4>CPC View (avg LPA)</h4>
+          <div class="cpc-grid" id="cpcGrid"></div>
+        </div>
+
+        <div class="kpi-block">
+          <h4>Offer Acceptance Rate</h4>
+          <div class="gauge-wrap"><canvas id="chartGauge" width="180" height="100"></canvas>
+            <div class="gauge-value" id="gaugeValue">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tier view -->
+      <div class="card" id="cardTier">
+        <h3>Tier View</h3>
+        <div class="chart-wrap"><canvas id="chartTier"></canvas></div>
+      </div>
+
+      <!-- Client interview -->
+      <div class="card" id="cardClientInt">
+        <h3>Client Interview Rounds</h3>
+        <div class="chart-wrap"><canvas id="chartClientInt"></canvas></div>
+      </div>
+
+      <!-- Employment type -->
+      <div class="card" id="cardEmpType">
+        <h3>Employment Type</h3>
+        <div class="chart-wrap"><canvas id="chartEmpType"></canvas></div>
+      </div>
+
+      <!-- Practice table -->
+      <div class="card" id="cardPractice">
+        <h3>Practice</h3>
+        <table class="data-table" id="tablePractice"></table>
+      </div>
+
+      <!-- Employer table -->
+      <div class="card" id="cardEmployer">
+        <h3>Present Employer (Account)</h3>
+        <table class="data-table" id="tableEmployer"></table>
+      </div>
+
+      <!-- Employment split bars -->
+      <div class="card" id="cardEmpSplit">
+        <h3>Permanent / Contract Split</h3>
+        <div id="empSplitBars" class="split-bars"></div>
+      </div>
+
+      <!-- Margin -->
+      <div class="card" id="cardMargin">
+        <h3>Avg. Margin %</h3>
+        <div id="marginRows" class="margin-rows"></div>
+      </div>
+
+      <!-- Monthly view -->
+      <div class="card" id="cardMonthly">
+        <h3>Monthly View (Onboards)</h3>
+        <div class="chart-wrap"><canvas id="chartMonthly"></canvas></div>
+      </div>
+
+    </section>
+
+    <footer class="footer">
+      Fulfilment Dashboard &middot; Demo data &middot; Built with Flask + Chart.js
+    </footer>
+  </main>
+</div>
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
